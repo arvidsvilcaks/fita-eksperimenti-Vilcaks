@@ -68,7 +68,6 @@ def create_submission(
     data: SubmissionCreate,
     omd: Annotated[Callable[[str], str | None], Depends(get_omd)],
 ) -> SubmissionCreated:
-    logger.info("Jauns iesniegums: %s", data.model_dump())
     received_at = datetime.now(timezone.utc).replace(microsecond=0)
 
     if omd(data.personalCode) == "ACTIVE":
@@ -86,6 +85,8 @@ def create_submission(
             "reasonCode": None,
         }
     )
+    # Žurnālā tikai ID: personas kods un teksts ir personas dati (CR-1).
+    logger.info("Jauns iesniegums: %s", record["id"])
     return SubmissionCreated(**record)
 
 
