@@ -8,8 +8,8 @@ reporter: "Reģistrācijas nodaļa (izdomāts)"
 owner: "@<github-lietotājvārds>"
 contract: "docs/openapi.yaml · POST /submissions · personalCode"
 depends_on: []
-exported: "2026-09-30 · Ezermalas pieteikumu sistēma (simulācija)"
-data_check: "Nav personas datu, iekšējo adrešu vai pielikumu"
+exported: "2026-10-05 · Ezermalas pieteikumu sistēma (simulācija)"
+data_check: "Nav personas datu, iekšējo adrešu vai pielikumu. Personas kodi piemēros ir sintētiski."
 ---
 
 # CR-1 · Personas koda pārbaude iesniegumā
@@ -24,27 +24,34 @@ Iesniegumos bieži ir nepareizi personas kodi. Sistēmai jāpārbauda, vai perso
 
 | # | Ievade | Sagaidāmais rezultāts |
 |---|---|---|
-| 1 |32000000001|201|
-| 2 |320000-00001|201, saglabāts bez defises|
-| 3 |" 32000000001 "|201 (atstarpes noņemtas)|
-| 4 |3200000001|400 INVALID_FORMAT|
-| 5 |320000000132|400 INVALID_FORMAT|
-| 6 |320000000O1|400 INVALID_FORMAT|
-| 7 ||400 REQUIRED|
-| 8 |010180-12345|201|
-| 9 |3200-0000001|400 INVALID_FORMAT|
+| 1 | `32000000001` | 201, saglabāts `32000000001` |
+| 2 | `320000-00001` | 201, saglabāts `32000000001` |
+| 3 | `" 32000000001 "` | 201 (atstarpes noņemtas) |
+| 4 | `3200000000` (10 cipari) | 400 `INVALID_FORMAT` |
+| 5 | `320000000012` (12 cipari) | 400 `INVALID_FORMAT` |
+| 6 | `32000000O01` (burts O) | 400 `INVALID_FORMAT` |
+| 7 | Lauka nav | 400 `REQUIRED` |
+| 8 | Vecā formāta sintētisks kods `311299-21233` | 201, saglabāts `31129921233` |
+| 9 | `3200-0000001` (defise nepareizā vietā) | 400 `INVALID_FORMAT` |
 
 ## Precizējumi (clarifications)
 
 | Jautājums | Atbilde | Kas atbildēja, kad |
 |---|---|---|
-|Vai pirms validācijas personas kodam jānoņem sākuma un beigu atstarpes?|Jā, sākuma un beigu atstarpes tiek noņemtas.|Produkta īpašnieks, 05.10.2026.|
-|Vai personas kods ar defisi 320000-00001 jāuzglabā ar defisi?|Nē, defise tiek noņemta un personas kods tiek saglabāts formātā 32000000001.|Produkta īpašnieks, 05.10.2026.|
-| | | |
+| Vai pieņemt defisi? | Abus veidus: `DDMMYY-NNNNN` un 11 ciparus. Saglabāt 11 ciparus bez defises. | Produkta īpašnieks, 2026-09-30 |
+| Vai pārbaudīt dzimšanas datumu vai kontrolciparu? | Nē. Tikai formātu. Jaunajiem kodiem (sākas ar `32`) nav ne viena, ne otra. | Produkta īpašnieks, 2026-09-30 |
+| Tukša virkne vai tikai atstarpes? | Tāpat kā tad, ja lauka nav: 400 `REQUIRED`. | Produkta īpašnieks, 2026-09-30 |
+| Kāda ir kļūdas atbilde? | 400 pēc līguma (API contract): `INVALID_FORMAT`, vai `REQUIRED`, ja lauka nav. Kļūda atbilst līguma kļūdu shēmai. | Produkta īpašnieks, 2026-09-30 |
+| Vai kļūdas ziņojumā drīkst atkārtot ievadīto kodu? | Nē. Ne atbildē, ne žurnālā. Tikai lauka nosaukums un kļūdas kods. | Produkta īpašnieks, 2026-09-30 |
+| Vai mainās atbildes shēma? | Nē. | Produkta īpašnieks, 2026-09-30 |
 
 ## Ārpus tvēruma (out of scope)
 
-- Personas koda derīguma pārbaude pret PMLP vai citu ārēju reģistru; tiek pārbaudīts tikai ievades formāts.
+- Kontrolcipara un dzimšanas datuma pārbaude
+- Pārbaude reģistrā, vai persona eksistē (CR-2)
+- Citu lauku pārbaude: vārds, e-pasts, temats, teksts
+- Esošie iesniegumi ar nepareiziem kodiem
+- Ārvalstnieki bez personas koda
 
 ## Komentāri (comments)
 
