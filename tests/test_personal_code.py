@@ -50,6 +50,20 @@ def test_invalid_personal_code_returns_400(client, valid_payload, fake_omd, code
     assert fake_omd.calls == []
 
 
+@pytest.mark.parametrize("code", [None, 32000000001])
+def test_non_string_personal_code_returns_invalid_format(
+    client, valid_payload, fake_omd, code
+):
+    valid_payload["personalCode"] = code
+    response = client.post("/submissions", json=valid_payload)
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "VALIDATION_ERROR"
+    assert _issues(response) == [{"field": "personalCode", "issue": "INVALID_FORMAT"}]
+    assert "32000000001" not in response.text
+    assert storage.get("IES-2026-000001") is None
+    assert fake_omd.calls == []
+
+
 def test_missing_personal_code_returns_required(client, valid_payload, fake_omd):  # 7
     del valid_payload["personalCode"]
     response = client.post("/submissions", json=valid_payload)
